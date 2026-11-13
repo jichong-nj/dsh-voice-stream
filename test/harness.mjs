@@ -16,6 +16,7 @@ function reactStub() {
     Fragment: Symbol('Fragment'),
     useState: (initial) => [typeof initial === 'function' ? initial() : initial, () => {}],
     useEffect: () => {},
+    useLayoutEffect: () => {},
     useRef: (initial) => ({ current: initial }),
     useCallback: (fn) => fn,
     useMemo: (fn) => fn(),
@@ -69,6 +70,7 @@ export async function loadClientModule() {
   if (definition.id !== '@jichong/dsh-voice-stream') throw new Error(`unexpected module id: ${definition.id}`)
   return definition.factory((id) => {
     if (id === 'react') return reactStub()
+    if (id === 'react-dom') return { createPortal: (node) => node }
     throw new Error(`unexpected module request: ${id}`)
   })
 }

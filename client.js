@@ -13,11 +13,12 @@ window.__ModuleLoader__.load({
 	id: "@jichong/dsh-voice-stream",
 	factory(require) {
 		const React = require("react");
-		const { useState, useEffect, useRef, useCallback } = React;
+		const ReactDOM = require("react-dom");
+		const { useState, useEffect, useLayoutEffect, useRef, useCallback } = React;
 		const h = React.createElement;
 
 		const PKG = "@jichong/dsh-voice-stream";
-		const CLIENT_VERSION = "0.1.2";
+		const CLIENT_VERSION = "0.1.3";
 		const NS = "voice-stream";
 		const API = "/voice-stream-api";
 		const CSS_ID = `${PKG}/vs.css`;
@@ -726,21 +727,30 @@ window.__ModuleLoader__.load({
 .vs-text-btn{flex:0 0 auto;padding:2px 10px;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.32));border-radius:999px;background:transparent;color:inherit;font-size:12px;cursor:pointer}
 .vs-text-btn:hover{background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.16))}
 .vs-spinner{flex:0 0 auto;width:12px;height:12px;border:2px solid var(--dsw-alias-border-l1,rgba(127,127,127,.35));border-top-color:currentColor;border-radius:50%;animation:vs-spin .8s linear infinite}
-.vs-mask{position:fixed;inset:0;z-index:2100;display:flex;align-items:center;justify-content:center;padding:16px;background:var(--dsw-alias-bg-mask-1,rgba(0,0,0,.42))}
-.vs-dialog{width:min(440px,100%);max-height:min(76vh,640px);overflow:auto;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.35));border-radius:12px;background:var(--dsw-alias-bg-layer-2,Canvas);color:var(--dsw-alias-label-primary,CanvasText);box-shadow:0 18px 48px rgba(0,0,0,.32);padding:18px 20px;font-size:13px;line-height:1.55}
-.vs-dialog h3{margin:0 0 8px;font-size:15px;font-weight:600}
-.vs-hint{margin:0 0 14px;color:var(--dsw-alias-label-secondary,inherit)}
-.vs-field{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-top:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.18))}
-.vs-field-label{color:var(--dsw-alias-label-secondary,inherit)}
-.vs-field-value{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vs-select{max-width:180px;padding:3px 8px;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.35));border-radius:6px;background:transparent;color:inherit;font-size:12px}
-.vs-progress{height:6px;border-radius:3px;background:var(--dsw-alias-border-l1,rgba(127,127,127,.22));overflow:hidden;margin:6px 0}
-.vs-progress-fill{display:block;height:100%;background:var(--dsw-alias-state-business-primary,#1f6feb);transition:width .25s ease}
-.vs-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
-.vs-btn{padding:5px 12px;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.35));border-radius:7px;background:transparent;color:inherit;font-size:12px;cursor:pointer}
-.vs-btn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.16))}
-.vs-btn:disabled{opacity:.45;cursor:default}
-.vs-btn.primary{border-color:var(--dsw-alias-button-primary-fill,#1f6feb);background:var(--dsw-alias-button-primary-fill,#1f6feb);color:var(--dsw-alias-label-primary-foreground,#fff)}
+.vs-pop{position:fixed;z-index:2600;box-sizing:border-box;width:240px;padding:9px 11px 10px;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.35));border-radius:10px;background:var(--dsw-alias-bg-layer-2,Canvas);color:var(--dsw-alias-label-primary,CanvasText);box-shadow:0 12px 30px rgba(0,0,0,.3);font-size:12px;line-height:1.45}
+.vs-pop-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;font-weight:600;color:var(--dsw-alias-label-secondary,inherit)}
+.vs-pop-close{padding:0 2px;border:0;background:transparent;color:inherit;font-size:14px;line-height:1;opacity:.6;cursor:pointer}
+.vs-pop-close:hover{opacity:1}
+.vs-pop-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0}
+.vs-pop-label{color:var(--dsw-alias-label-secondary,inherit)}
+.vs-select{max-width:116px;padding:2px 6px;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.35));border-radius:5px;background:transparent;color:inherit;font-size:11.5px}
+.vs-pop-note{margin-top:4px;font-size:10.5px;color:var(--dsw-alias-label-tertiary,inherit);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs-pop-status{margin-top:6px;font-size:11px;color:var(--dsw-alias-label-secondary,inherit)}
+.vs-pop-progress{height:4px;border-radius:2px;background:var(--dsw-alias-border-l1,rgba(127,127,127,.22));overflow:hidden;margin:5px 0}
+.vs-pop-progress > span{display:block;height:100%;background:var(--dsw-alias-state-business-primary,#1f6feb);transition:width .25s ease}
+.vs-pop-actions{display:flex;gap:6px;margin-top:8px}
+.vs-pop-btn{flex:1;padding:4px 8px;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.35));border-radius:6px;background:transparent;color:inherit;font-size:11px;cursor:pointer}
+.vs-pop-btn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover,rgba(127,127,127,.16))}
+.vs-pop-btn:disabled{opacity:.45;cursor:default}
+.vs-pop-btn.primary{border-color:var(--dsw-alias-button-primary-fill,#1f6feb);background:var(--dsw-alias-button-primary-fill,#1f6feb);color:var(--dsw-alias-label-primary-foreground,#fff)}
+.vs-switch{position:relative;display:inline-flex;flex:0 0 auto;width:34px;height:18px}
+.vs-switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.vs-switch-track{position:absolute;inset:0;border-radius:9px;background:rgba(127,127,127,.4);transition:background .16s ease}
+.vs-switch-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.35);transition:transform .16s ease}
+.vs-switch input:checked + .vs-switch-track{background:var(--dsw-alias-state-business-primary,#1f6feb)}
+.vs-switch input:checked + .vs-switch-track .vs-switch-thumb{transform:translateX(16px)}
+.vs-switch input:disabled + .vs-switch-track{opacity:.4}
+.vs-switch input:disabled{cursor:default}
 @keyframes vs-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
 @keyframes vs-spin{to{transform:rotate(360deg)}}
 `;
@@ -816,25 +826,70 @@ window.__ModuleLoader__.load({
 
 		/* ───────────────────────── 准备对话框 ───────────────────────── */
 
-		function SetupDialog({ catalog, available, connected, onClose, onRefresh, polishEnabled, polishAvailable, polishInfo, polishModel, onTogglePolish }) {
+		function SettingsPopover({
+			anchor,
+			catalog,
+			available,
+			connected,
+			onClose,
+			onRefresh,
+			polishEnabled,
+			polishAvailable,
+			polishInfo,
+			polishModel,
+			onTogglePolish,
+		}) {
 			const [busy, setBusy] = useState(false);
 			const [error, setError] = useState("");
+			const [position, setPosition] = useState(null);
+			const popoverRef = useRef(null);
+
 			const provider = catalog?.providers?.find((item) => item.id === catalog.selection?.providerId) ?? null;
 			const preparation = provider?.preparation ?? null;
 			const preparing = isPreparing(preparation);
+			const ready = preparation === null || ["ready", "standby", "waking"].includes(preparation.phase);
 			const percent = progressOf(preparation);
 			const languages = Array.isArray(provider?.languages) && provider.languages.length > 0 ? provider.languages : ["auto"];
 			const selectedLanguage = typeof catalog?.selection?.language === "string" ? catalog.selection.language : languages[0];
+
+			// 贴在麦克风左上角：浮层右边缘对齐触发点左侧，底边在触发点上方 8px，并夹在视口内。
+			useLayoutEffect(() => {
+				const element = popoverRef.current;
+				const rect = anchor?.getBoundingClientRect?.();
+				if (element === null || rect === undefined || rect === null) return;
+				const margin = 8;
+				const width = element.offsetWidth;
+				const height = element.offsetHeight;
+				const left = Math.max(margin, Math.min(rect.left - width, window.innerWidth - width - margin));
+				const top = Math.max(margin, rect.top - margin - height);
+				setPosition({ left, top });
+			}, [anchor, catalog, polishInfo, error, polishEnabled, ready]);
+
+			useEffect(() => {
+				const onPointerDown = (event) => {
+					const element = popoverRef.current;
+					if (element === null) return;
+					if (element.contains(event.target)) return;
+					if (anchor !== null && anchor !== undefined && anchor.contains?.(event.target)) return;
+					onClose?.();
+				};
+				const onViewportChange = () => onClose?.();
+				document.addEventListener("mousedown", onPointerDown, true);
+				window.addEventListener("resize", onViewportChange);
+				window.addEventListener("scroll", onViewportChange, true);
+				return () => {
+					document.removeEventListener("mousedown", onPointerDown, true);
+					window.removeEventListener("resize", onViewportChange);
+					window.removeEventListener("scroll", onViewportChange, true);
+				};
+			}, [anchor, onClose]);
 
 			const prepare = async () => {
 				if (busy) return;
 				setBusy(true);
 				setError("");
 				try {
-					await api("/prepare", {
-						method: "POST",
-						body: provider === null ? {} : { providerId: provider.id },
-					});
+					await api("/prepare", { method: "POST", body: provider === null ? {} : { providerId: provider.id } });
 					await onRefresh?.();
 				} catch (failure) {
 					setError(errorText(failure));
@@ -848,10 +903,7 @@ window.__ModuleLoader__.load({
 				setBusy(true);
 				setError("");
 				try {
-					await api("/prepare/cancel", {
-						method: "POST",
-						body: provider === null ? {} : { providerId: provider.id },
-					});
+					await api("/prepare/cancel", { method: "POST", body: provider === null ? {} : { providerId: provider.id } });
 					await onRefresh?.();
 				} catch (failure) {
 					setError(errorText(failure));
@@ -871,38 +923,41 @@ window.__ModuleLoader__.load({
 				}
 			};
 
-			return h(
-				"div",
-				{
-					className: "vs-mask",
-					onMouseDown: (event) => {
-						if (event.target === event.currentTarget) onClose?.();
-					},
-				},
+			const modelText = polishModel !== null && polishModel !== undefined
+				? `${polishModel.provider} / ${polishModel.model}`
+				: polishInfo === null
+					? "…"
+					: polishInfo.available === true
+						? `${polishInfo.provider} / ${polishInfo.model}`
+						: String(polishInfo.message ?? t("polishUnavailable"));
+
+			return ReactDOM.createPortal(
 				h(
 					"div",
-					{ className: "vs-dialog", role: "dialog", "aria-modal": "true", onMouseDown: (event) => event.stopPropagation() },
-					h("h3", null, t("dialogTitle")),
-					h("p", { className: "vs-hint" }, t("dialogHint")),
-					!connected
-						? h("div", { className: "vs-field" }, h("span", null, t("disconnected")))
-						: null,
-					connected && !available
-						? h("div", { className: "vs-field" }, h("span", null, t("unavailable")))
-						: null,
-					available && provider !== null
+					{
+						ref: popoverRef,
+						className: "vs-pop",
+						role: "dialog",
+						"aria-label": t("dialogTitle"),
+						style: position === null ? { visibility: "hidden", left: 0, top: 0 } : { left: position.left, top: position.top },
+					},
+					h(
+						"div",
+						{ className: "vs-pop-head" },
+						h("span", null, t("dialogTitle")),
+						h(
+							"button",
+							{ type: "button", className: "vs-pop-close", title: t("close"), "aria-label": t("close"), onClick: () => onClose?.() },
+							"×",
+						),
+					),
+					!connected ? h("div", { className: "vs-pop-status" }, t("disconnected")) : null,
+					connected && !available ? h("div", { className: "vs-pop-status" }, t("unavailable")) : null,
+					connected && available && provider !== null
 						? h(
 								"div",
-								{ className: "vs-field" },
-								h("span", { className: "vs-field-label" }, t("provider")),
-								h("span", { className: "vs-field-value" }, `${provider.name} · ${provider.location === "cloud" ? t("locCloud") : t("locHost")}`),
-							)
-						: null,
-					available && provider !== null
-						? h(
-								"div",
-								{ className: "vs-field" },
-								h("span", { className: "vs-field-label" }, t("language")),
+								{ className: "vs-pop-row" },
+								h("span", { className: "vs-pop-label" }, t("language")),
 								h(
 									"select",
 									{
@@ -914,57 +969,52 @@ window.__ModuleLoader__.load({
 								),
 							)
 						: null,
-					available && provider !== null
-						? h(
-								"label",
-								{ className: "vs-field", title: t("polishHint") },
-								h("span", { className: "vs-field-label" }, t("polish")),
-								h("input", {
-									type: "checkbox",
-									checked: polishAvailable === true && polishEnabled === true,
-									disabled: polishAvailable !== true,
-									onChange: (event) => onTogglePolish?.(event.target.checked),
-								}),
-							)
-						: null,
-					available && provider !== null && polishEnabled && polishAvailable
+					connected && available && provider !== null
 						? h(
 								"div",
-								{ className: "vs-field" },
-								h("span", { className: "vs-field-label" }, t("polishModel")),
-								h("span", { className: "vs-field-value" }, polishModel !== null && polishModel !== undefined
-									? `${polishModel.provider} / ${polishModel.model}`
-									: polishInfo === null
-										? "…"
-										: polishInfo.available === true
-											? `${polishInfo.provider} / ${polishInfo.model}`
-											: String(polishInfo.message ?? t("polishUnavailable"))),
+								{ className: "vs-pop-row" },
+								h("span", { className: "vs-pop-label", title: t("polishHint") }, t("polish")),
+								h(
+									"label",
+									{ className: "vs-switch", title: t("polishHint") },
+									h("input", {
+										type: "checkbox",
+										checked: polishAvailable === true && polishEnabled === true,
+										disabled: polishAvailable !== true,
+										onChange: (event) => onTogglePolish?.(event.target.checked),
+									}),
+									h("span", { className: "vs-switch-track" }, h("span", { className: "vs-switch-thumb" })),
+								),
 							)
 						: null,
-					available && provider !== null
+					connected && available && polishEnabled && polishAvailable
+						? h("div", { className: "vs-pop-note", title: modelText }, `${t("polishModel")}：${modelText}`)
+						: null,
+					connected && available && (!ready || preparing)
 						? h(
-								"div",
-								{ className: "vs-field" },
-								h("span", { className: "vs-field-label" }, t("status")),
-								h("span", { className: "vs-field-value", title: preparationText(preparation) }, preparationText(preparation)),
+								React.Fragment,
+								null,
+								h("div", { className: "vs-pop-status" }, preparationText(preparation)),
+								percent !== null
+									? h("div", { className: "vs-pop-progress" }, h("span", { style: { width: `${percent}%` } }))
+									: null,
+								h(
+									"div",
+									{ className: "vs-pop-actions" },
+									preparation?.phase === "unprepared" || preparation?.phase === "failed" || preparation?.phase === "cancelled"
+										? h("button", { type: "button", className: "vs-pop-btn primary", disabled: busy, onClick: () => void prepare() }, t("prepareStart"))
+										: null,
+									preparing
+										? h("button", { type: "button", className: "vs-pop-btn", disabled: busy || preparation?.phase === "cancelling", onClick: () => void cancelPreparation() }, t("prepareCancel"))
+										: null,
+								),
 							)
 						: null,
-					percent !== null
-						? h("div", { className: "vs-progress" }, h("span", { className: "vs-progress-fill", style: { width: `${percent}%` } }))
+					error !== ""
+						? h("div", { className: "vs-pop-note", style: { color: "var(--dsw-alias-state-error-primary,#e5484d)" } }, error)
 						: null,
-					error !== "" ? h("div", { className: "vs-field vs-caption vs-error", style: { color: "#e5484d" } }, error) : null,
-					h(
-						"div",
-						{ className: "vs-dialog-actions" },
-						available && provider !== null && (preparation?.phase === "unprepared" || preparation?.phase === "failed" || preparation?.phase === "cancelled")
-							? h("button", { type: "button", className: "vs-btn primary", disabled: busy, onClick: () => void prepare() }, t("prepareStart"))
-							: null,
-						available && preparing
-							? h("button", { type: "button", className: "vs-btn", disabled: busy || preparation?.phase === "cancelling", onClick: () => void cancelPreparation() }, t("prepareCancel"))
-							: null,
-						h("button", { type: "button", className: "vs-btn", onClick: () => onClose?.() }, t("close")),
-					),
 				),
+				document.body,
 			);
 		}
 
@@ -987,6 +1037,7 @@ window.__ModuleLoader__.load({
 			const [polishReady, setPolishReady] = useState(true);
 			const committedRef = useRef("");
 			const captionRef = useRef(null);
+			const anchorRef = useRef(null);
 			const sessionRef = useRef(null);
 			const spanRef = useRef(null);
 			const stoppingRef = useRef(false);
@@ -1065,6 +1116,7 @@ window.__ModuleLoader__.load({
 
 			const start = useCallback(async () => {
 				if (locked || sessionRef.current !== null) return;
+				setDialogOpen(false);
 				if (!usable || catalog === null || provider === null) {
 					setDialogOpen(true);
 					return;
@@ -1275,8 +1327,9 @@ window.__ModuleLoader__.load({
 				return () => clearInterval(timer);
 			}, [phase]);
 
-			const dialog = dialogOpen
-				? h(SetupDialog, {
+			const dialog = dialogOpen && phase === "idle"
+				? h(SettingsPopover, {
+						anchor: anchorRef.current,
 						catalog,
 						available,
 						connected,
@@ -1299,7 +1352,7 @@ window.__ModuleLoader__.load({
 					null,
 					h(
 						"span",
-						{ className: "vs-anchor" },
+						{ ref: anchorRef, className: "vs-anchor" },
 						h(
 							"button",
 							{
