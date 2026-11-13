@@ -134,11 +134,15 @@ const recording = await evaluate(`JSON.stringify({
   dialog: document.querySelector('.vs-dialog') !== null,
 })`)
 
-// 等假麦克风里的第一段（约 6.6 s 处停顿）识别回来
-await sleep(7000)
+// 等假麦克风里的第一段（约 6.6 s 处停顿）识别回来；VS_RECORD_MS 可加长录音
+await sleep(Number(process.env.VS_RECORD_MS ?? 7000))
 const live = await evaluate(`JSON.stringify({
   phase: document.querySelector('.vs-row')?.getAttribute('data-phase') ?? null,
   caption: document.querySelector('.vs-caption')?.innerText ?? null,
+  metrics: (() => {
+    const el = document.querySelector('.vs-caption')
+    return el === null ? null : { scrollLeft: el.scrollLeft, scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }
+  })(),
 })`)
 const liveShot = await screenshot('voice-stream-recording.png')
 
@@ -176,9 +180,13 @@ chrome.kill('SIGKILL')
 
 const liveCaption = JSON.parse(live).caption ?? ''
 const draft = JSON.parse(final).draft ?? ''
+const metrics = JSON.parse(live).metrics ?? null
+const tailVisible = metrics === null || metrics.scrollWidth <= metrics.clientWidth
+  || Math.abs(metrics.scrollWidth - metrics.clientWidth - metrics.scrollLeft) <= 2
 process.exitCode = JSON.parse(initial).mic === true
   && JSON.parse(recording).phase === 'recording'
   && liveCaption.includes('欢迎关注')
   && draft.includes('欢迎关注')
+  && tailVisible
   ? 0
   : 1

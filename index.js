@@ -31,7 +31,13 @@ const inject = ['webServer']
  * @param {{ provider?: string, model?: string }} [config] 可选：指定整理用的模型
  */
 export function apply(ctx, config = {}) {
-  const refs = { controller: null, service: null, polisher: null }
+  const refs = {
+    controller: null,
+    service: null,
+    polisher: null,
+    // 整理调用统计：用来确认浏览器端到底有没有发起整理、结果有没有变化。
+    polishStats: { calls: 0, changed: 0, unchanged: 0, fallback: 0, failed: 0, last: null, lastError: null },
+  }
   const llmRefs = { llm: null, defaultModel: null }
 
   // 停止后的文字整理复用 DSH 的 LLM 服务；模型缺失时整理不可用，录音照常。

@@ -92,7 +92,15 @@ function makeSpeech({ transcript = { text: '你好', audioSeconds: 1, inferenceS
       return { text: text.replace(/呃/g, ''), provider: 'p1', model: 'm1', elapsedMs: 0.01, fallback: null, changed: true }
     },
   }
-  return { refs: { controller, service, polisher }, calls }
+  return {
+    refs: {
+      controller,
+      service,
+      polisher,
+      polishStats: { calls: 0, changed: 0, unchanged: 0, fallback: 0, failed: 0, last: null, lastError: null },
+    },
+    calls,
+  }
 }
 
 const silentLogger = { warn: () => {}, info: () => {} }
@@ -228,6 +236,16 @@ await test('POST /polish 透传输入框当前模型', async () => {
   assert.equal(result.status, 200)
   assert.equal(calls.provider, 'p2')
   assert.equal(calls.model, 'm2')
+})
+
+await test('整理统计写入 /status（含客户端版本）', async () => {
+  const { refs } = makeSpeech()
+  const handler = createApiHandler(refs, { logger: silentLogger })
+  await call(handler, 'POST', '/polish', { body: { text: '呃 你好', clientVersion: '0.1.1' } })
+  const status = await call(handler, 'GET', '/status')
+  assert.equal(status.body.data.polishStats.calls, 1)
+  assert.equal(status.body.data.polishStats.changed, 1)
+  assert.equal(status.body.data.polishStats.last.clientVersion, '0.1.1')
 })
 
 await test('POST /polish 空文本 400', async () => {

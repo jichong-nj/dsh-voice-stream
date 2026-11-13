@@ -17,6 +17,7 @@ window.__ModuleLoader__.load({
 		const h = React.createElement;
 
 		const PKG = "@jichong/dsh-voice-stream";
+		const CLIENT_VERSION = "0.1.1";
 		const NS = "voice-stream";
 		const API = "/voice-stream-api";
 		const CSS_ID = `${PKG}/vs.css`;
@@ -701,7 +702,7 @@ window.__ModuleLoader__.load({
 .vs-row[data-phase="recording"] .vs-dot{background:var(--dsw-alias-state-error-primary,#e5484d);animation:vs-pulse 1.1s ease-in-out infinite}
 .vs-meter{flex:0 0 44px;height:4px;border-radius:2px;background:var(--dsw-alias-border-l1,rgba(127,127,127,.25));overflow:hidden}
 .vs-meter-fill{display:block;height:100%;width:0;border-radius:2px;background:var(--dsw-alias-state-business-primary,currentColor);opacity:.8;transition:width .08s linear}
-.vs-caption{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--dsw-alias-label-secondary,inherit)}
+.vs-caption{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;font-size:12px;color:var(--dsw-alias-label-secondary,inherit)}
 .vs-caption.vs-error{color:var(--dsw-alias-state-error-primary,#e5484d)}
 .vs-note{flex:0 0 auto;font-size:12px;color:var(--dsw-alias-label-tertiary,inherit)}
 .vs-text-btn{flex:0 0 auto;padding:2px 10px;border:0.5px solid var(--dsw-alias-border-l1,rgba(127,127,127,.32));border-radius:999px;background:transparent;color:inherit;font-size:12px;cursor:pointer}
@@ -967,6 +968,7 @@ window.__ModuleLoader__.load({
 			const [polishInfo, setPolishInfo] = useState(null);
 			const [polishReady, setPolishReady] = useState(true);
 			const committedRef = useRef("");
+			const captionRef = useRef(null);
 			const sessionRef = useRef(null);
 			const spanRef = useRef(null);
 			const stoppingRef = useRef(false);
@@ -1155,6 +1157,7 @@ window.__ModuleLoader__.load({
 							body: {
 								text,
 								language: languageRef.current,
+								clientVersion: CLIENT_VERSION,
 								...(selection === null ? {} : { provider: selection.provider, model: selection.model }),
 							},
 							signal: controller.signal,
@@ -1182,6 +1185,12 @@ window.__ModuleLoader__.load({
 				}
 				resetToIdle();
 			}, [failWith, inputActions, phase, polishEnabled, polishReady, resetToIdle]);
+
+			// 字幕单行显示：每次有新文本就滚到末尾，保证看到的是最新转出的内容。
+			useEffect(() => {
+				const element = captionRef.current;
+				if (element !== null) element.scrollLeft = element.scrollWidth;
+			}, [committed, phase]);
 
 			// 录音条展开时告诉输入框让位。
 			const expanded = phase !== "idle";
@@ -1370,7 +1379,7 @@ window.__ModuleLoader__.load({
 					h("span", { className: "vs-dot" }),
 					h("span", { className: "vs-time" }, formatDuration(seconds)),
 					h("span", { className: "vs-meter" }, h("span", { className: "vs-meter-fill", style: { width: `${Math.min(100, Math.round(Math.sqrt(level) * 180))}%` } })),
-					h("span", { className: "vs-caption", title: committed === "" ? caption : committed }, caption),
+					h("span", { ref: captionRef, className: "vs-caption", title: committed === "" ? caption : committed }, caption),
 					phase === "polishing" && committed !== "" ? h("span", { className: "vs-note" }, t("polishing")) : null,
 					phase === "recording"
 						? h(

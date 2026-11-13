@@ -1,6 +1,6 @@
 {
   "name": "@jichong/dsh-voice-stream",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Streaming dictation for the DSH composer: pause-based segmentation, per-segment SenseVoice transcription, live captions and optional LLM tidy-up before insertion",
   "license": "MIT",
   "author": {
