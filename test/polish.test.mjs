@@ -118,6 +118,45 @@ await test('指定的 provider/model 不可用时退回默认模型', async () =
   assert.equal(result2.model, 'm1')
 })
 
+await test('输出预算被截断时翻倍重试一次', async () => {
+  const calls = []
+  const llm = {
+    listProviders: () => [{ id: 'p1' }],
+    listModels: async () => [{ id: 'm1' }],
+    stream(options) {
+      calls.push(options)
+      const first = calls.length === 1
+      return (async function* () {
+        if (!first) yield { type: 'text-delta', text: '整理后的文字。' }
+        yield { type: 'finish', reason: { kind: first ? 'max-tokens' : 'stop' } }
+      })()
+    },
+  }
+  const result = await makePolisher(llm).polish('这是一段需要整理的语音识别原文')
+  assert.equal(result.text, '整理后的文字。')
+  assert.equal(result.fallback, null)
+  assert.equal(calls.length, 2)
+  assert.ok(calls[0].maxTokens >= 2048, `first budget ${calls[0].maxTokens}`)
+  assert.ok(calls[1].maxTokens > calls[0].maxTokens)
+})
+
+await test('两次都截断时回退原文并带上部分输出长度', async () => {
+  const llm = {
+    listProviders: () => [{ id: 'p1' }],
+    listModels: async () => [{ id: 'm1' }],
+    stream() {
+      return (async function* () {
+        yield { type: 'text-delta', text: '只整理了一半' }
+        yield { type: 'finish', reason: { kind: 'max-tokens' } }
+      })()
+    },
+  }
+  const result = await makePolisher(llm).polish('原始识别文本')
+  assert.equal(result.text, '原始识别文本')
+  assert.equal(result.fallback, 'truncated')
+  assert.equal(result.partialChars, 6)
+})
+
 await test('模型被 max-tokens 截断时回退原文', async () => {
   const llm = fakeLlm({ text: '被截断的整理', reason: { kind: 'max-tokens' } })
   const result = await makePolisher(llm).polish('原始识别文本')

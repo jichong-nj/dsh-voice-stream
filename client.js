@@ -17,7 +17,7 @@ window.__ModuleLoader__.load({
 		const h = React.createElement;
 
 		const PKG = "@jichong/dsh-voice-stream";
-		const CLIENT_VERSION = "0.1.1";
+		const CLIENT_VERSION = "0.1.2";
 		const NS = "voice-stream";
 		const API = "/voice-stream-api";
 		const CSS_ID = `${PKG}/vs.css`;
@@ -54,6 +54,11 @@ window.__ModuleLoader__.load({
 			"polishModel": "整理模型",
 			"polishing": "正在整理文字…",
 			"polishFailed": "整理失败，已插入识别原文：{message}",
+			"polishFallback": "整理未完成（{reason}），已插入识别原文",
+			"fallbackTruncated": "输出被截断",
+			"fallbackEmpty": "模型没有输出",
+			"fallbackShortened": "输出异常变短",
+			"fallbackTooLong": "原文过长",
 			"polishUnavailable": "整理模型不可用",
 			"disconnected": "无法连接 Host 服务，请检查 DSH 是否仍在运行。",
 			"language": "识别语言",
@@ -110,6 +115,11 @@ window.__ModuleLoader__.load({
 			"polishModel": "Tidy model",
 			"polishing": "Tidying text…",
 			"polishFailed": "Tidy failed; inserted the raw transcript: {message}",
+			"polishFallback": "Tidy-up incomplete ({reason}); inserted the raw transcript",
+			"fallbackTruncated": "output was truncated",
+			"fallbackEmpty": "the model returned nothing",
+			"fallbackShortened": "output was unexpectedly short",
+			"fallbackTooLong": "the transcript was too long",
 			"polishUnavailable": "Tidy model unavailable",
 			"disconnected": "Cannot reach the Host service. Check that DSH is still running.",
 			"language": "Language",
@@ -198,6 +208,14 @@ window.__ModuleLoader__.load({
 				text = text.replace(/\{(\w+)\}/g, (match, name) => (vars[name] === undefined ? match : String(vars[name])));
 			}
 			return text;
+		}
+
+		function fallbackText(reason) {
+			if (reason === "truncated") return t("fallbackTruncated");
+			if (reason === "empty-output") return t("fallbackEmpty");
+			if (reason === "shortened") return t("fallbackShortened");
+			if (reason === "too-long") return t("fallbackTooLong");
+			return String(reason);
 		}
 
 		function languageLabel(language) {
@@ -1145,6 +1163,7 @@ window.__ModuleLoader__.load({
 				}
 				// 停止后先过大模型整理；整理不可用或失败就用识别原文，绝不挡住输入。
 				let polishFailure = null;
+				let polishFallback = null;
 				if (polishEnabled && polishReady) {
 					setPhase("polishing");
 					const controller = new AbortController();
@@ -1163,6 +1182,7 @@ window.__ModuleLoader__.load({
 							signal: controller.signal,
 						});
 						if (typeof result?.text === "string" && result.text.trim() !== "") text = result.text.trim();
+						if (typeof result?.fallback === "string" && result.fallback !== "") polishFallback = result.fallback;
 					} catch (error) {
 						if (controller.signal.aborted) return;
 						polishFailure = error;
@@ -1180,6 +1200,11 @@ window.__ModuleLoader__.load({
 				}
 				if (polishFailure !== null) {
 					setMessage(t("polishFailed", { message: errorText(polishFailure) }));
+					setPhase("feedback");
+					return;
+				}
+				if (polishFallback !== null) {
+					setMessage(t("polishFallback", { reason: fallbackText(polishFallback) }));
 					setPhase("feedback");
 					return;
 				}
