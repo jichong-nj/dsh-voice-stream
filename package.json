@@ -1,0 +1,99 @@
+{
+  "name": "@jichong/dsh-voice-stream",
+  "version": "0.1.0",
+  "description": "Streaming dictation for the DSH composer: pause-based segmentation, per-segment SenseVoice transcription, live captions and optional LLM tidy-up before insertion",
+  "license": "MIT",
+  "author": {
+    "name": "jichong-nj",
+    "email": "jichong79@gmail.com"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "voice",
+    "speech",
+    "streaming",
+    "sensevoice",
+    "语音输入",
+    "流式"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jichong-nj/dsh-voice-stream.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jichong-nj/dsh-voice-stream/issues"
+  },
+  "homepage": "https://github.com/jichong-nj/dsh-voice-stream#readme",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./icon": "./icon.svg",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "test",
+    "docs"
+  ],
+  "icon": "./icon.svg",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "scripts": {
+    "check": "node --check index.js && node --check client.js && node --check lib/api.js && node --check lib/polish.js && npm test",
+    "test": "node test/run.mjs && node test/api.test.mjs && node test/polish.test.mjs",
+    "test:ui": "node test/ui-e2e.mjs",
+    "test:headless": "node test/headless-check.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.5",
+    "@deepseek-ai/dsh-agent-default-model": "*",
+    "@deepseek-ai/dsh-experimental-api-speech-to-text": "*",
+    "@deepseek-ai/dsh-experimental-speech-to-text": "*",
+    "@deepseek-ai/dsh-experimental-speech-to-text-sensevoice": "*",
+    "@deepseek-ai/dsh-llm": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-agent-default-model": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-experimental-api-speech-to-text": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-experimental-speech-to-text": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-experimental-speech-to-text-sensevoice": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-llm": {
+      "optional": true
+    }
+  }
+}

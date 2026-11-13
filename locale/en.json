@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Streaming dictation",
+    "description": "Dictate in the composer with pause-based segmentation: each finished phrase is transcribed and shown while you keep speaking, instead of waiting for Stop.",
+    "detail": "README.md"
+  }
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="Streaming dictation">
+  <rect width="24" height="24" rx="6" fill="#1f6feb"/>
+  <rect x="5" y="9" width="2" height="6" rx="1" fill="#ffffff"/>
+  <rect x="9" y="6" width="2" height="12" rx="1" fill="#ffffff"/>
+  <rect x="13" y="4" width="2" height="16" rx="1" fill="#ffffff"/>
+  <rect x="17" y="8" width="2" height="8" rx="1" fill="#ffffff"/>
+</svg>

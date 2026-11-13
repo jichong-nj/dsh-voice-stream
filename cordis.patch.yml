@@ -1,0 +1,21 @@
+# dsh-voice-stream — patch layer over the shipped Voice Input bundle.
+#
+# The shipped `@deepseek-ai/dsh-experimental-voice-input-bundle` composes the
+# speech Host rows plus the official batched microphone UI. We keep every Host
+# row (speech-to-text, sensevoice provider, speech Remote controller) and only
+# replace the browser control: the official `ui-voice-input` row records one
+# whole clip and inserts text only after Stop, while this bundle segments the
+# stream by pauses and transcribes each finished segment while the user is
+# still speaking.
+#
+# Row order matters: this bundle must sit after the Voice Input bundle in
+# `dsh.profile.bundles` so the override targets an existing row. When the Voice
+# Input bundle is not composed, the target matches no row, the loader warns,
+# and this bundle's own server routes report the speech service as unavailable.
+- id: ui-voice-input
+  name: '@deepseek-ai/dsh-experimental-client-ui-voice-input'
+  disabled: true
+
+- insert:
+    - id: voice-stream
+      name: '@jichong/dsh-voice-stream'
